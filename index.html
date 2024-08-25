@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Score Tracker</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVGVhbSBTY29yZSBUcmFja2VyIiwic2hvcnRfbmFtZSI6IlNjb3JlIFRyYWNrZXIiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZmZmZmZiIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCJ9">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .scoreboard {
+            display: flex;
+            flex-grow: 1;
+        }
+        .team {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            color: white;
+        }
+        .red { background-color: #ff4136; }
+        .blue { background-color: #0074d9; }
+        .score {
+            font-size: 8rem;
+            text-align: center;
+        }
+        .team-name {
+            font-size: 2rem;
+            text-align: center;
+        }
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            font-size: 2rem;
+            padding: 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+        .controls button {
+            font-size: 1.5rem;
+            padding: 10px 20px;
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="scoreboard">
+        <div class="team red">
+            <h2 class="team-name">Red Team</h2>
+            <div class="score" id="redScore">0</div>
+            <div class="button-container">
+                <button onclick="updateScore('red', 1)">+1</button>
+                <button onclick="updateScore('red', -1)">-1</button>
+            </div>
+        </div>
+        <div class="team blue">
+            <h2 class="team-name">Blue Team</h2>
+            <div class="score" id="blueScore">0</div>
+            <div class="button-container">
+                <button onclick="updateScore('blue', 1)">+1</button>
+                <button onclick="updateScore('blue', -1)">-1</button>
+            </div>
+        </div>
+    </div>
+    <div class="controls">
+        <button onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <script>
+        let scores = { red: 0, blue: 0 };
+
+        function updateScore(team, change) {
+            scores[team] += change;
+            if (scores[team] < 0) scores[team] = 0;
+            document.getElementById(`${team}Score`).textContent = scores[team];
+            saveGame();
+        }
+
+        function resetGame() {
+            scores = { red: 0, blue: 0 };
+            document.getElementById('redScore').textContent = '0';
+            document.getElementById('blueScore').textContent = '0';
+            saveGame();
+        }
+
+        function saveGame() {
+            sessionStorage.setItem('gameScores', JSON.stringify(scores));
+        }
+
+        function loadGame() {
+            const savedScores = sessionStorage.getItem('gameScores');
+            if (savedScores) {
+                scores = JSON.parse(savedScores);
+                document.getElementById('redScore').textContent = scores.red;
+                document.getElementById('blueScore').textContent = scores.blue;
+            }
+        }
+
+        window.addEventListener('load', loadGame);
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(function(registration) {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
